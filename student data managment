@@ -1,0 +1,275 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+
+const int MAX_STDS = 50; // Maximum number of students
+const int SUBJECTS = 10; // Total available subjects
+
+// Predefined subjects
+string available_subjects[SUBJECTS] = { "Computer Programming", "Computer Programming Lab", "Discrete Mathematics", "Professional Practices & Ethics", "Introduction to Information & Communication Technology", "Introduction to Information & Communication Technology Lab", "Islamic Studies", "Applied Physics", "Applied Physics Lab", "Tajweed" };
+
+string roll_no[MAX_STDS], name[MAX_STDS], section[MAX_STDS], mobile_no[MAX_STDS], admission_year[MAX_STDS], subjects[MAX_STDS][SUBJECTS], grades[MAX_STDS][SUBJECTS];
+int subject_count[MAX_STDS]; // To store the number of subjects per student
+int total = 0; // to store the total number of students
+
+void saveToFile() {
+    ofstream file("students.txt");
+    file << total << endl;
+    for (int i = 0; i < total; i++) {
+        file << roll_no[i] << endl;
+        file << name[i] << endl;
+        file << section[i] << endl;
+        file << mobile_no[i] << endl;
+        file << admission_year[i] << endl;
+        file << subject_count[i] << endl;
+        for (int j = 0; j < subject_count[i]; j++) {
+            file << subjects[i][j] << endl;
+            file << grades[i][j] << endl;
+        }
+    }
+    file.close();
+}
+
+void loadFromFile() {
+    ifstream file("students.txt");
+    if (file.is_open()) {
+        file >> total;
+        file.ignore(); // To skip the newline character after total
+        for (int i = 0; i < total; i++) {
+            getline(file, roll_no[i]);
+            getline(file, name[i]);
+            getline(file, section[i]);
+            getline(file, mobile_no[i]);
+            getline(file, admission_year[i]);
+            file >> subject_count[i];
+            file.ignore(); // To skip the newline character after subject_count
+            for (int j = 0; j < subject_count[i]; j++) {
+                getline(file, subjects[i][j]);
+                getline(file, grades[i][j]);
+            }
+        }
+        file.close();
+    }
+}
+
+void enter() {
+    int ch = 0;
+    cout << "How many students do you want to enter?" << endl;
+    cin >> ch;
+    if (total + ch > MAX_STDS) {
+        cout << "Cannot enter more than " << MAX_STDS << " students." << endl;
+        return;
+    }
+
+    for (int i = total; i < total + ch; i++) {
+        cout << "\nEnter the Data of student " << i + 1 << endl << endl;
+        cout << "Enter Roll NO: " << endl;
+        cin >> roll_no[i];
+        cout << "Enter Name: " << endl;
+        cin >> name[i];
+        cout << "Enter Section:(BSCS-1) " << endl;
+        cin >> section[i];
+        cout << "Enter Mobile NO: " << endl;
+        cin >> mobile_no[i];
+        cout << "Enter Admission Year: " << endl;
+        cin >> admission_year[i];
+
+        cout << "How many subjects is the student taking? (Max " << SUBJECTS << "): ";
+        cin >> subject_count[i];
+        if (subject_count[i] > SUBJECTS) {
+            cout << "Student cannot take more than " << SUBJECTS << " subjects." << endl;
+            subject_count[i] = SUBJECTS;
+        }
+
+        cout << "Available subjects:" << endl;
+        for (int j = 0; j < SUBJECTS; j++) {
+            cout << j + 1 << ". " << available_subjects[j] << endl;
+        }
+
+        for (int j = 0; j < subject_count[i]; j++) {
+            int subject_choice;
+            cout << "Choose subject " << j + 1 << " (enter the number): ";
+            cin >> subject_choice;
+            if (subject_choice < 1 || subject_choice > SUBJECTS) {
+                cout << "Invalid choice. Try again." << endl;
+                j--;
+                continue;
+            }
+            subjects[i][j] = available_subjects[subject_choice - 1];
+            cout << "Enter Grade for " << subjects[i][j] << ": ";
+            cin >> grades[i][j];
+        }
+    }
+    total += ch;
+    saveToFile();
+}
+
+void show() {
+    system("CLS");
+    if (total == 0) {
+        cout << "No Data is Entered" << endl;
+    }
+    else {
+        for (int i = 0; i < total; i++) {
+            cout << "\nData of Student " << i + 1 << endl << endl;
+            cout << "Roll NO: " << roll_no[i] << endl;
+            cout << "Name: " << name[i] << endl;
+            cout << "Class: ( BSCS - 1 " << section[i]<<" )"<< endl;
+            cout << "Mobile NO: " << mobile_no[i] << endl;
+            cout << "Admission Year: " << admission_year[i] << endl;
+            for (int j = 0; j < subject_count[i]; j++) {
+                cout << "Subject " << j + 1 << ": " << subjects[i][j] << ", Grade: " << grades[i][j] << endl;
+            }
+        }
+    }
+}
+
+void search() {
+    system("CLS");
+    if (total == 0) {
+        cout << "No data is entered" << endl;
+    }
+    else {
+        string rollno;
+        cout << "Enter the roll no of student" << endl;
+        cin >> rollno;
+        for (int i = 0; i < total; i++) {
+            if (rollno == roll_no[i]) {
+                cout << "Roll NO: " << roll_no[i] << endl;
+                cout << "Name: " << name[i] << endl;
+                cout << "Class: ( BSCS - 1 " << section[i] << " )" << endl;
+                cout << "Mobile NO: " << mobile_no[i] << endl;
+                cout << "Admission Year: " << admission_year[i] << endl;
+                for (int j = 0; j < subject_count[i]; j++) {
+                    cout << "Subject " << j + 1 << ": " << subjects[i][j] << ", Grade: " << grades[i][j] << endl;
+                }
+                break;
+            }
+        }
+    }
+}
+
+void update() {
+    system("CLS");
+    if (total == 0) {
+        cout << "No data is entered" << endl;
+    }
+    else {
+        string rollno;
+        cout << "Enter the roll no of student which you want to update" << endl;
+        cin >> rollno;
+        for (int i = 0; i < total; i++) {
+            if (rollno == roll_no[i]) {
+                cout << "\nPrevious data" << endl << endl;
+                cout << "Data of Student " << i + 1 << endl;
+                cout << "Roll NO: " << roll_no[i] << endl;
+                cout << "Name: " << name[i] << endl;
+                cout << "Class: ( BSCS - 1 " << section[i] << " )" << endl;
+                cout << "Mobile NO: " << mobile_no[i] << endl;
+                cout << "Admission Year: " << admission_year[i] << endl;
+                for (int j = 0; j < subject_count[i]; j++) {
+                    cout << "Subject " << j + 1 << ": " << subjects[i][j] << ", Grade: " << grades[i][j] << endl;
+                }
+                cout << "\nEnter new data" << endl << endl;
+                cout << "Enter Roll NO: ";
+                cin >> roll_no[i];
+                cout << "Enter Name: ";
+                cin >> name[i];
+                cout << "Enter Section: ( BSCS - 1 )";
+                cin >> section[i];
+                cout << "Enter Mobile NO: ";
+                cin >> mobile_no[i];
+                cout << "Enter Admission Year: ";
+                cin >> admission_year[i];
+
+                cout << "How many subjects is the student taking? (Max " << SUBJECTS << "): ";
+                cin >> subject_count[i];
+                if (subject_count[i] > SUBJECTS) {
+                    cout << "Student cannot take more than " << SUBJECTS << " subjects." << endl;
+                    subject_count[i] = SUBJECTS;
+                }
+
+                cout << "Available subjects:" << endl;
+                for (int j = 0; j < SUBJECTS; j++) {
+                    cout << j + 1 << ". " << available_subjects[j] << endl;
+                }
+
+                for (int j = 0; j < subject_count[i]; j++) {
+                    int subject_choice;
+                    cout << "Choose subject " << j + 1 << " (enter the number): ";
+                    cin >> subject_choice;
+                    if (subject_choice < 1 || subject_choice > SUBJECTS) {
+                        cout << "Invalid choice. Try again." << endl;
+                        j--;
+                        continue;
+                    }
+                    subjects[i][j] = available_subjects[subject_choice - 1];
+                    cout << "Enter Grade for " << subjects[i][j] << ": ";
+                    cin >> grades[i][j];
+                }
+                break;
+            }
+        }
+        saveToFile();
+    }
+}
+
+void Delete() {
+    system("CLS");
+    if (total == 0) {
+        cout << "No data is entered yet" << endl;
+    }
+    else {
+        int a;
+        cout << "Are you Sure to Delete Data?" << endl;
+        cout << "Press 1 to delete all records" << endl;
+        cin >> a;
+        if (a == 1) {
+            total = 0;
+            cout << "All record is deleted!" << endl;
+        }
+        else {
+            cout << "Please Press 1 to Delete All Record" << endl;
+        }
+        saveToFile();
+    }
+}
+
+int main() {
+    loadFromFile();
+    int value;
+    while (true) {
+        cout << "\nPress 1 to Enter data" << endl << endl;
+        cout << "Press 2 to Show data" << endl << endl;
+        cout << "Press 3 to Search data" << endl << endl;
+        cout << "Press 4 to Update data" << endl << endl;
+        cout << "Press 5 to Delete data" << endl << endl;
+        cout << "Press 6 to Quit" << endl << endl;
+        cin >> value;
+        switch (value) {
+        case 1:
+            enter();
+            break;
+        case 2:
+            show();
+            break;
+        case 3:
+            search();
+            break;
+        case 4:
+            update();
+            break;
+        case 5:
+            Delete();
+            break;
+        case 6:
+            exit(0);
+            break;
+        default:
+            cout << "Invalid input" << endl;
+            break;
+        }
+    }
+    return 0;
+}
